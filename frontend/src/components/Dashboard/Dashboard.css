@@ -1,0 +1,25 @@
+.main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  flex: 1;
+}
+
+.header h1 {
+  font-family: "Indie Flower", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.chat-component {
+  display: flex;
+  flex: 4;
+  margin-top: 60px;
+  justify-content: center;
+}
