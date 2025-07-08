@@ -1,5 +1,3 @@
-import os
-from dotenv import load_dotenv
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
@@ -7,17 +5,13 @@ from langchain.memory import ConversationBufferMemory
 from vector_store import VectorStoreConfig
 import warnings
 
-load_dotenv()
-
 warnings.filterwarnings("ignore")
 
 
 class RagBot:
     def __init__(self):
-        csv_path = os.getenv("CSV_PATH")
         self.llm = ChatOllama(model="llama3")
-        
-        vector_store_config = VectorStoreConfig(csv_path=csv_path)
+        vector_store_config = VectorStoreConfig()
         self.vector_store = vector_store_config.load_or_create_vector_store()
         self.retriever = self.vector_store.as_retriever()
         self.memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
@@ -28,5 +22,15 @@ class RagBot:
         )
         
     def ask(self, question: str) -> str:
+        context = """
+        You are a medical expert'
+        Greet the user politely and ask them to provide their medical question if they used any greeting words.
+        Don't mention the word context or reference the data source in your answer.
+        Use the information from the context to provide a concise and accurate answer.
+        If the question is not related to the context, say 'I don't know and suggest them to consult their doubt with a trained medical professional'.
+        Ask a series of clarifying questions to narrow down the patient's condition if the question is vague or too broad.
+        If the question is about a specific medical condition, provide a detailed answer based on the context.
+        """
+        question = f"{context} {question}"
         response = self.chain.invoke({"question": question})
         return response["answer"]
