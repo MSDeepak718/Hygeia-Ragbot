@@ -11,12 +11,17 @@ class VectorStoreConfig:
         self.vector_store_path = vector_store_path
         self.embedding_model = embedding_model
         self.embeddings = OllamaEmbeddings(model=self.embedding_model)
-        
+        self._docs = None
+
     def vector_store_exists(self) -> bool:
-        return os.path.exists(self.vector_store_path) and len(os.listdir(self.vector_store_path)) > 0
+        return (
+            os.path.exists(self.vector_store_path)
+            and len(os.listdir(self.vector_store_path)) > 0
+        )
 
     def create_vector_store(self):
         docs = load_data()
+        self._docs = docs
         vector_store = FAISS.from_documents(docs, self.embeddings)
         vector_store.save_local(self.vector_store_path)
 
@@ -24,6 +29,16 @@ class VectorStoreConfig:
         if not self.vector_store_exists():
             print(f"Vector store not found at {self.vector_store_path}. Creating a new one...")
             self.create_vector_store()
-            return FAISS.load_local(self.vector_store_path, self.embeddings, allow_dangerous_deserialization=True)
-        else:
-            return FAISS.load_local(self.vector_store_path, self.embeddings, allow_dangerous_deserialization=True)
+        vector_store = FAISS.load_local(
+            self.vector_store_path,
+            self.embeddings,
+            allow_dangerous_deserialization=True,
+        )
+        if self._docs is None:
+            self._docs = load_data()
+        return vector_store
+
+    def get_documents(self):
+        if self._docs is None:
+            self._docs = load_data()
+        return self._docs

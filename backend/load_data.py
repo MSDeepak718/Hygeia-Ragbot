@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 import ast
-from langchain.docstore.document import Document
+from langchain_classic.docstore.document import Document
 
 # Load the patient data
 df = pd.read_csv("./assets/temp_patients_data",header=0)
